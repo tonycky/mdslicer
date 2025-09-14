@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
 const { program } = require("commander");
-const fs = require("fs");
-const path = require("path");
+const slicer = require("./src/slicer");
 
 program
   .name("mdslicer")
@@ -13,7 +12,10 @@ program
   .command("slice")
   .description("Slice a markdown file")
   .argument("<input>", "input markdown file")
-  .argument("<output>", "output directory")
+  .argument(
+    "[output]",
+    "output directory (defaults to filename without extension)"
+  )
   .option("-s, --sections", "split by sections (## headers)")
   .option(
     "-c, --chunks <size>",
@@ -23,11 +25,28 @@ program
   .action((input, output, options) => {
     console.log("Slicing markdown file...");
     console.log(`Input: ${input}`);
-    console.log(`Output: ${output}`);
+
+    // Use default output directory if not provided
+    if (!output) {
+      const path = require("path");
+      output = path.basename(input, path.extname(input));
+      console.log(`Output: ${output} (default)`);
+    } else {
+      console.log(`Output: ${output}`);
+    }
+
     console.log(`Options:`, options);
 
-    // TODO: Implement the actual slicing logic
-    console.log("Feature coming soon!");
+    const result = slicer.sliceMarkdown(input, output);
+
+    if (result.success) {
+      console.log(
+        `\nSuccessfully sliced ${result.inputFile} into ${result.filesCreated} files in ${result.outputDir}`
+      );
+    } else {
+      console.error(`Error: ${result.error}`);
+      process.exit(1);
+    }
   });
 
 program
@@ -37,19 +56,16 @@ program
   .action((file) => {
     console.log(`Analyzing ${file}...`);
 
-    if (!fs.existsSync(file)) {
-      console.error(`Error: File '${file}' does not exist`);
+    const result = slicer.getFileInfo(file);
+
+    if (result.success) {
+      console.log(`Lines: ${result.stats.lines}`);
+      console.log(`Headers: ${result.stats.headers}`);
+      console.log(`Code blocks: ${result.stats.codeBlocks}`);
+    } else {
+      console.error(`Error: ${result.error}`);
       process.exit(1);
     }
-
-    const content = fs.readFileSync(file, "utf8");
-    const lines = content.split("\n").length;
-    const headers = content.match(/^#{1,6}\s+.*/gm) || [];
-    const codeBlocks = (content.match(/```[\s\S]*?```/g) || []).length;
-
-    console.log(`Lines: ${lines}`);
-    console.log(`Headers: ${headers.length}`);
-    console.log(`Code blocks: ${codeBlocks}`);
   });
 
 program.parse();
