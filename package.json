@@ -1,31 +1,41 @@
 {
   "name": "mdslicer",
   "version": "1.0.0",
-  "description": "A Node.js CLI tool for slicing markdown files",
+  "description": "A powerful Node.js CLI tool for intelligently slicing and processing markdown files. Automatically splits large markdown documents into organized, navigable sections while preserving structure and creating an index file for easy navigation.",
   "main": "cli.js",
   "bin": {
     "mdslicer": "./cli.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node cli.js"
   },
   "keywords": [
     "cli",
     "markdown",
     "tool",
-    "slicer"
+    "slicer",
+    "documentation",
+    "nodejs",
+    "split",
+    "sections",
+    "navigation",
+    "index"
   ],
-  "author": "",
+  "author": "tonycky",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tonycky/mdslicer.git"
+  },
+  "homepage": "https://github.com/tonycky/mdslicer#readme",
+  "bugs": {
+    "url": "https://github.com/tonycky/mdslicer/issues"
+  },
   "engines": {
     "node": ">=14.0.0"
   },
   "preferGlobal": true,
   "dependencies": {
     "commander": "^14.0.1"
-  },
-  "devDependencies": {
-    "jest": "^30.1.3"
   }
 }
