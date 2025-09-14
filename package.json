@@ -1,0 +1,28 @@
+{
+  "name": "mdslicer",
+  "version": "1.0.0",
+  "description": "A Node.js CLI tool for slicing markdown files",
+  "main": "cli.js",
+  "bin": {
+    "mdslicer": "./cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node cli.js"
+  },
+  "keywords": [
+    "cli",
+    "markdown",
+    "tool",
+    "slicer"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "preferGlobal": true,
+  "dependencies": {
+    "commander": "^14.0.1"
+  }
+}
