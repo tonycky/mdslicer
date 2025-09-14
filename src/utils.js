@@ -5,6 +5,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { REGEX_PATTERNS, MESSAGES, FILE_OPERATIONS } = require("./constants");
 
 /**
  * Check if a file exists
@@ -21,7 +22,7 @@ function fileExists(filePath) {
  * @returns {string} File content
  */
 function readFile(filePath) {
-  return fs.readFileSync(filePath, "utf8");
+  return fs.readFileSync(filePath, FILE_OPERATIONS.ENCODING);
 }
 
 /**
@@ -41,7 +42,7 @@ function getBaseName(filePath) {
 function ensureDirectoryExists(dirPath) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
-    console.log(`Created directory: ${dirPath}`);
+    console.log(`${MESSAGES.CREATED_DIRECTORY} ${dirPath}`);
   }
   return dirPath;
 }
@@ -67,23 +68,6 @@ function validateInputFile(inputPath) {
   }
 }
 
-/**
- * Get file statistics for info command
- * @param {string} content - File content
- * @returns {Object} File statistics
- */
-function getFileStats(content) {
-  const lines = content.split("\n").length;
-  const headers = content.match(/^#{1,6}\s+.*/gm) || [];
-  const codeBlocks = (content.match(/```[\s\S]*?```/g) || []).length;
-
-  return {
-    lines,
-    headers: headers.length,
-    codeBlocks,
-  };
-}
-
 module.exports = {
   fileExists,
   readFile,
@@ -91,5 +75,4 @@ module.exports = {
   ensureDirectoryExists,
   buildOutputPath,
   validateInputFile,
-  getFileStats,
 };

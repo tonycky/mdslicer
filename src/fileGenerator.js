@@ -5,6 +5,13 @@
 
 const fs = require("fs");
 const path = require("path");
+const {
+  FILE_NAMES,
+  SECTION_TYPES,
+  MESSAGES,
+  FILE_OPERATIONS,
+  STRING_PATTERNS,
+} = require("./constants");
 
 /**
  * Generate navigation content for index.md
@@ -13,14 +20,16 @@ const path = require("path");
  */
 function generateNavigation(level2Sections) {
   if (level2Sections.length === 0) {
-    return "";
+    return FILE_OPERATIONS.EMPTY_STRING;
   }
 
-  let navigation = "\n\n## Navigation\n\n";
+  let navigation = `${FILE_OPERATIONS.NEWLINE}${FILE_OPERATIONS.NEWLINE}${FILE_NAMES.NAVIGATION_HEADER}${FILE_OPERATIONS.NEWLINE}${FILE_OPERATIONS.NEWLINE}`;
   level2Sections.forEach((section, index) => {
     const linkText = section.heading;
-    const linkFile = `${section.fileName}.md`;
-    navigation += `${index + 1}. [${linkText}](${linkFile})\n`;
+    const linkFile = `${section.fileName}${STRING_PATTERNS.DOT_MD}`;
+    navigation += `${index + 1}. [${linkText}](${linkFile})${
+      FILE_OPERATIONS.NEWLINE
+    }`;
   });
 
   return navigation;
@@ -33,7 +42,7 @@ function generateNavigation(level2Sections) {
  * @returns {string} Complete index.md content
  */
 function generateIndexContent(rootSection, level2Sections) {
-  let content = rootSection.content.join("\n");
+  let content = rootSection.content.join(FILE_OPERATIONS.NEWLINE);
   content += generateNavigation(level2Sections);
   return content;
 }
@@ -44,7 +53,7 @@ function generateIndexContent(rootSection, level2Sections) {
  * @returns {string} Section file content
  */
 function generateSectionContent(section) {
-  return section.content.join("\n");
+  return section.content.join(FILE_OPERATIONS.NEWLINE);
 }
 
 /**
@@ -53,24 +62,26 @@ function generateSectionContent(section) {
  * @param {string} outputDir - Output directory path
  */
 function writeFiles(sections, outputDir) {
-  const level2Sections = sections.filter((s) => s.type === "level2");
+  const level2Sections = sections.filter(
+    (s) => s.type === SECTION_TYPES.LEVEL2
+  );
 
   sections.forEach((section) => {
     let fileName;
     let fileContent;
 
-    if (section.type === "root") {
-      fileName = "index.md";
+    if (section.type === SECTION_TYPES.ROOT) {
+      fileName = FILE_NAMES.INDEX;
       fileContent = generateIndexContent(section, level2Sections);
-    } else if (section.type === "level2") {
-      fileName = `${section.fileName}.md`;
+    } else if (section.type === SECTION_TYPES.LEVEL2) {
+      fileName = `${section.fileName}${STRING_PATTERNS.DOT_MD}`;
       fileContent = generateSectionContent(section);
     }
 
     if (fileName && fileContent) {
       const filePath = path.join(outputDir, fileName);
       fs.writeFileSync(filePath, fileContent);
-      console.log(`Created: ${fileName}`);
+      console.log(`${MESSAGES.CREATED_FILE} ${fileName}`);
     }
   });
 }

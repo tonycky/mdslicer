@@ -3,17 +3,25 @@
  * Handles parsing of markdown content into structured sections
  */
 
+const {
+  HEADING_LEVELS,
+  SECTION_TYPES,
+  REGEX_PATTERNS,
+  FILE_OPERATIONS,
+  STRING_PATTERNS,
+} = require("./constants");
+
 /**
  * Find the root level (minimum heading level) in the markdown content
  * @param {string} content - The markdown content to analyze
  * @returns {number} The root level (1-6)
  */
 function findRootLevel(content) {
-  const lines = content.split("\n");
-  let minLevel = 6; // Start with maximum possible level
+  const lines = content.split(FILE_OPERATIONS.NEWLINE);
+  let minLevel = HEADING_LEVELS.MAX; // Start with maximum possible level
 
   for (const line of lines) {
-    const match = line.match(/^(#{1,6})\s+/);
+    const match = line.match(REGEX_PATTERNS.HEADING);
     if (match) {
       const level = match[1].length;
       if (level < minLevel) {
@@ -22,7 +30,10 @@ function findRootLevel(content) {
     }
   }
 
-  return minLevel === 6 ? 1 : minLevel; // Default to 1 if no headings found
+  // Default to 1 if no headings found
+  return minLevel === HEADING_LEVELS.MAX
+    ? HEADING_LEVELS.DEFAULT_ROOT
+    : minLevel;
 }
 
 /**
@@ -31,7 +42,7 @@ function findRootLevel(content) {
  * @returns {RegExp} Regex pattern for that heading level
  */
 function createHeadingPattern(level) {
-  const hashes = "#".repeat(level);
+  const hashes = STRING_PATTERNS.HASH_SYMBOL.repeat(level);
   return new RegExp(`^${hashes}\\s+`);
 }
 
@@ -41,7 +52,7 @@ function createHeadingPattern(level) {
  * @returns {Array} Array of section objects
  */
 function parseMarkdown(content) {
-  const lines = content.split("\n");
+  const lines = content.split(FILE_OPERATIONS.NEWLINE);
   const rootLevel = findRootLevel(content);
   const nextLevel = rootLevel + 1;
 
@@ -49,7 +60,11 @@ function parseMarkdown(content) {
   const nextLevelPattern = createHeadingPattern(nextLevel);
 
   const sections = [];
-  let currentSection = { type: "root", content: [], heading: "" };
+  let currentSection = {
+    type: SECTION_TYPES.ROOT,
+    content: [],
+    heading: FILE_OPERATIONS.EMPTY_STRING,
+  };
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -57,7 +72,7 @@ function parseMarkdown(content) {
     // Check for root level heading
     if (line.match(rootPattern)) {
       if (
-        currentSection.type === "root" &&
+        currentSection.type === SECTION_TYPES.ROOT &&
         currentSection.content.length === 0
       ) {
         currentSection.heading = line.replace(rootPattern, "");
@@ -68,7 +83,7 @@ function parseMarkdown(content) {
           sections.push({ ...currentSection });
         }
         currentSection = {
-          type: "root",
+          type: SECTION_TYPES.ROOT,
           content: [line],
           heading: line.replace(rootPattern, ""),
         };
@@ -84,11 +99,11 @@ function parseMarkdown(content) {
       // Start new sub-section
       const headingText = line.replace(nextLevelPattern, "");
       const sectionNumber =
-        sections.filter((s) => s.type === "level2").length + 1;
+        sections.filter((s) => s.type === SECTION_TYPES.LEVEL2).length + 1;
       const fileName = generateFileName(sectionNumber, headingText);
 
       currentSection = {
-        type: "level2",
+        type: SECTION_TYPES.LEVEL2,
         content: [line],
         heading: headingText,
         fileName: fileName,
@@ -115,10 +130,10 @@ function parseMarkdown(content) {
  * @returns {string} Generated filename
  */
 function generateFileName(sectionNumber, headingText) {
-  return `${sectionNumber}-${headingText
+  return `${sectionNumber}${STRING_PATTERNS.DASH}${headingText
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .replace(/\s+/g, "-")}`;
+    .replace(REGEX_PATTERNS.FILENAME_SANITIZE, FILE_OPERATIONS.EMPTY_STRING)
+    .replace(REGEX_PATTERNS.WHITESPACE, STRING_PATTERNS.DASH)}`;
 }
 
 /**
@@ -127,7 +142,7 @@ function generateFileName(sectionNumber, headingText) {
  * @returns {Array} Array of level 2 sections
  */
 function getLevel2Sections(sections) {
-  return sections.filter((s) => s.type === "level2");
+  return sections.filter((s) => s.type === SECTION_TYPES.LEVEL2);
 }
 
 module.exports = {

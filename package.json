@@ -24,5 +24,8 @@
   "preferGlobal": true,
   "dependencies": {
     "commander": "^14.0.1"
+  },
+  "devDependencies": {
+    "jest": "^30.1.3"
   }
 }
